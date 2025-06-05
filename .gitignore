@@ -1,0 +1,58 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Web
+/reclaimr-web/node_modules
+/reclaimr-web/.pnp
+/reclaimr-web.pnp.*
+/reclaimr-web.yarn/*
+/reclaimr-web!.yarn/patches
+/reclaimr-web!.yarn/plugins
+/reclaimr-web!.yarn/releases
+/reclaimr-web!.yarn/versions
+
+# Server
+/reclaimr-server/node_modules
+/reclaimr-server/.pnp
+/reclaimr-server/.pnp.*
+/reclaimr-server/.yarn/*
+/reclaimr-server/!.yarn/patches
+/reclaimr-server/!.yarn/plugins
+/reclaimr-server/!.yarn/releases
+/reclaimr-server/!.yarn/versions
+
+# testing
+/reclaimr-server/coverage
+/reclaimr-web/coverage
+
+# next.js
+/reclaimr-web/.next/
+/reclaimr-web/out/
+
+# production
+/reclaimr-web/build
+/reclaimr-server/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+/reclaimr-web/.env*
+/reclaimr-server/.env*
+
+# vercel
+/reclaimr-web/.vercel
+/reclaimr-server/.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/reclaimr-web/*storybook.log
+/reclaimr-web/storybook-static

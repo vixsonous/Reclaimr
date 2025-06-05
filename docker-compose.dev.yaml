@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  postgres: 
+    image: postgres:latest
+    container_name: reclaimr_postgres_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - reclaimr_postgres:/var/lib/postgresql/data
+  reclaimerserver:
+    build:
+      context: ./reclaimr-server
+      dockerfile: Dockerfile
+    ports: 
+      - "3001:3001"
+    volumes:
+      - "./reclaimr-server:/app"
+      - "/app/node_modules"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+  reclaimrweb:
+    build:
+      context: ./reclaimr-web
+      dockerfile: Dockerfile
+    ports: 
+      - "3000:3000"
+    volumes:
+      - ./reclaimr-web:/app
+      - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+volumes:
+  reclaimr_postgres:
