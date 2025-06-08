@@ -1,39 +1,39 @@
 "use client";
-import Button from "@/app/_components/Button";
 import { ICoordinates } from "@/types/map-types";
-import { useState } from "react";
-import Map from "react-map-gl/mapbox";
+import { useMemo, useRef, useState } from "react";
+import Map, { Marker } from "react-map-gl/mapbox";
+import FoundItemModal from "./FoundItemModal";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/redux-store/store";
 
 export default function MapClient() {
 
+  const mapref = useRef(null);
   const [coords, setCoords] = useState<ICoordinates>({
-    latitude: 37.8,
-    longitude: -122.4
-  })
-  
-  const showLocation = () => {
-    navigator.geolocation.getCurrentPosition((loc) => {
-      console.log(loc);
-      setCoords({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude
-      });
+    latitude: 40.68985092532933,
+    longitude: -73.98109555019138,
+    zoom: 14
+  });
 
-    });
-  }
+  const items = useSelector((state: RootState) => state.mapItems);
+
+  const markers = useMemo(() => items.map(i => <Marker key={i.id} longitude={i.longitude} latitude={i.latitude}/>), [items]);
+  
   return (
     <>
     <Map 
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-      {...coords}
-      zoom={14}
-      onMove={(evt) => setCoords(evt.viewState)}
-      style={{width: 600, height: 400}}
-      mapStyle="mapbox://styles/mapbox/streets-v9"
-    />
-    <Button onClick={showLocation}>
-      Found an item?
-    </Button>
+        reuseMaps
+        ref={mapref}
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+        {...coords}
+        zoom={coords.zoom ? coords.zoom : 14}
+        onMove={(evt) => setCoords(evt.viewState)}
+        style={{width: 600, height: 400}}
+        mapStyle="mapbox://styles/mapbox/streets-v9"
+      >
+        {markers}
+      </Map>
+      <FoundItemModal setCoords={setCoords}/>
     </>
   )
 }
