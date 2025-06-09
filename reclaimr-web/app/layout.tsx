@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,6 +19,7 @@ export default function RootLayout({
         className={`antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

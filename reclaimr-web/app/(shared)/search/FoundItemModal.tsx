@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { v4 } from "uuid";
 import {FieldValues, useForm} from "react-hook-form";
 import FileUploadInput from "./FileUploadInput";
+import { ApiResponse, ItemApiService } from "@/lib/ApiService";
 
 export default function FoundItemModal({
   setCoords
@@ -43,9 +44,11 @@ export default function FoundItemModal({
     });
   }
 
-  const onSubmit = (data:FieldValues) => {
+  const onSubmit = async (data:FieldValues) => {
     console.log(data);
     console.log(errors);
+    const ret:boolean = await ItemApiService.uploadFoundItem();
+    console.log(ret);
   };
 
   const files:Record<string, File> = watch("item_images");
@@ -56,15 +59,15 @@ export default function FoundItemModal({
   }) : [];
   return (
     <Modal>
-      <form onSubmit={handleSubmit(onSubmit)} className="w-4xl" action="">
+      <form onSubmit={handleSubmit(onSubmit)} action="">
         <Input {...register("itemName", {required: true, maxLength: 10})} placeholder="Name of the item"/>
         {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
         <Input {...register("timeFound")} placeholder="Time you found it"/>
         <FileUploadInput type="file" {...register("item_images")}/>
         <section>
           <h1>Images Uploaded</h1>
-          <div className="flex max-w-4xl  flex-row flex-wrap">
-            {f.map(url => <img key={url} src={url}/>)}
+          <div className="flex flex-row flex-wrap">
+            {f.map(url => <img className="aspect-square object-cover" width={100} height={100} key={url} src={url}/>)}
           </div>
         </section>
         <Button onClick={getLocation}>
