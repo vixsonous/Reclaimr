@@ -3,6 +3,7 @@ services:
   postgres: 
     image: postgres:latest
     container_name: reclaimr_postgres_db
+    env_file: /reclaimr-server/.env
     ports:
       - "5432:5432"
     volumes:

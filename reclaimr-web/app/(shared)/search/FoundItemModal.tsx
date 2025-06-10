@@ -50,7 +50,7 @@ export default function FoundItemModal({
   }
 
   const onSubmit = async (data:FieldValues) => {
-    console.log(submitCoords);
+    console.log(data);
     if(!submitCoords.latitude || !submitCoords.longitude) {
       toast.error("Coordinates not set", {
         description: "Please click the confirm button location"

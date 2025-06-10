@@ -1,10 +1,12 @@
 {
   "scripts": {
-    "dev": "tsx watch server.ts"
+    "dev": "tsx watch server.ts",
+    "migrate": "tsx db/migrate.ts"
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.2",
+    "@types/pg": "^8.15.4",
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
