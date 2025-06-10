@@ -19,7 +19,7 @@ export default function RootLayout({
         className={`antialiased`}
       >
         {children}
-        <Toaster />
+        <Toaster richColors/>
       </body>
     </html>
   );

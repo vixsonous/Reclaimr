@@ -3,5 +3,6 @@ import { ApiResponse } from "../class/api-class";
 
 export const uploadFoundItem = (req: Request, res: Response) => {
 
-  res.status(400).json(new ApiResponse('qweqwe!', 'true', true));
+  console.log(req.body);
+  res.status(200).json(new ApiResponse('qweqwe!', true, true));
 }

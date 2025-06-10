@@ -1,6 +1,7 @@
 import express, { json, urlencoded } from 'express';
 import router from './routes';
 import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors({
 
 app.use(json());
 app.use(cookieParser());
+app.use(bodyParser.urlencoded());
 app.use(urlencoded({extended: true}));
 app.use('/api', router);
 

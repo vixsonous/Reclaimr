@@ -10,6 +10,7 @@ import { v4 } from "uuid";
 import {FieldValues, useForm} from "react-hook-form";
 import FileUploadInput from "./FileUploadInput";
 import { ApiResponse, ItemApiService } from "@/lib/ApiService";
+import { toast } from "sonner";
 
 export default function FoundItemModal({
   setCoords
@@ -19,11 +20,15 @@ export default function FoundItemModal({
 
   const dispatch = useDispatch();
   const {register, handleSubmit, watch, formState: {errors} } = useForm();
-  const [fileUrls, setFileUrls] = useState<Array<string>>([]);
+  const [submitCoords, setSubmitCoords] = useState<Partial<ICoordinates>>({
+    latitude: undefined,
+    longitude: undefined
+  });
   
   const setLocation = () => {
     navigator.geolocation.getCurrentPosition((coords) => {
       setCoords({latitude: coords.coords.latitude, longitude: coords.coords.longitude});
+      setSubmitCoords({latitude: coords.coords.latitude, longitude: coords.coords.longitude});
       dispatch(addMapItem({
         id: v4(),
         title: '',
@@ -45,16 +50,28 @@ export default function FoundItemModal({
   }
 
   const onSubmit = async (data:FieldValues) => {
-    console.log(data);
-    console.log(errors);
-    const ret:boolean = await ItemApiService.uploadFoundItem();
-    console.log(ret);
+    console.log(submitCoords);
+    if(!submitCoords.latitude || !submitCoords.longitude) {
+      toast.error("Coordinates not set", {
+        description: "Please click the confirm button location"
+      })
+      return;
+    }
+
+    const ret:boolean = await ItemApiService.uploadFoundItem({
+      item_name: data.itemName,
+      item_images: data.itemImages,
+      coordinates: {
+        latitude: submitCoords.latitude,
+        longitude: submitCoords.longitude
+      }
+    });
   };
 
-  const files:Record<string, File> = watch("item_images");
+  const files:Record<string, File> = watch("itemImages");
   const f = files ? Object.keys(files).map(sFile => {
     const file = files[sFile];
-    
+
     return URL.createObjectURL(file);
   }) : [];
   return (
@@ -62,8 +79,7 @@ export default function FoundItemModal({
       <form onSubmit={handleSubmit(onSubmit)} action="">
         <Input {...register("itemName", {required: true, maxLength: 10})} placeholder="Name of the item"/>
         {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
-        <Input {...register("timeFound")} placeholder="Time you found it"/>
-        <FileUploadInput type="file" {...register("item_images")}/>
+        <FileUploadInput type="file" {...register("itemImages")}/>
         <section>
           <h1>Images Uploaded</h1>
           <div className="flex flex-row flex-wrap">
