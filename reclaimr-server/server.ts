@@ -2,6 +2,7 @@ import express, { json, urlencoded } from 'express';
 import router from './routes';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import multer from 'multer';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();

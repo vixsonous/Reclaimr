@@ -11,6 +11,7 @@ import {FieldValues, useForm} from "react-hook-form";
 import FileUploadInput from "./FileUploadInput";
 import { ApiResponse, ItemApiService } from "@/lib/ApiService";
 import { toast } from "sonner";
+import Loader from "@/app/_components/Loader";
 
 export default function FoundItemModal({
   setCoords
@@ -25,7 +26,11 @@ export default function FoundItemModal({
     longitude: undefined
   });
   
-  const setLocation = () => {
+  const setLocation = (e:React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    toast("Retrieving location", {
+      description: <h1>"Retrieving location data. Please wait"</h1>
+    });
     navigator.geolocation.getCurrentPosition((coords) => {
       setCoords({latitude: coords.coords.latitude, longitude: coords.coords.longitude});
       setSubmitCoords({latitude: coords.coords.latitude, longitude: coords.coords.longitude});
@@ -37,16 +42,6 @@ export default function FoundItemModal({
         longitude: coords.coords.longitude
       }));
     }); 
-  }
-
-  const getLocation = (e:React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    navigator.permissions.query({name: 'geolocation'}).then(res => {
-      if(res.state === 'granted') {
-        setLocation();
-      }
-    });
   }
 
   const onSubmit = async (data:FieldValues) => {
@@ -86,10 +81,10 @@ export default function FoundItemModal({
             {f.map(url => <img className="aspect-square object-cover" width={100} height={100} key={url} src={url}/>)}
           </div>
         </section>
-        <Button onClick={getLocation}>
-          Confirm location
+        <Button onClick={setLocation}>
+          Confirm location <Loader />
         </Button>
-        <Button>
+        <Button role="submit">
           Submit
         </Button>
       </form>

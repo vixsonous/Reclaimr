@@ -56,7 +56,7 @@ export class ItemApiService {
         data,
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'multipart/form-data'
           }
         }
       );
