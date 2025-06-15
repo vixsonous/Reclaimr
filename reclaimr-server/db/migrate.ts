@@ -1,8 +1,11 @@
-import { Migration, MigrationProvider, Migrator } from "kysely";
+import { Kysely, Migration, MigrationProvider, Migrator, PostgresDialect } from "kysely";
 import { fileURLToPath } from "url";
 import * as path from 'path';
 import { promises as fs } from 'fs';
-import { db } from "./db";
+import { Pool } from "pg";
+import { Database } from "./types";
+import dotenv from 'dotenv';
+dotenv.config();
 
 class ESMFileMigrationProvider implements MigrationProvider {
   constructor(private relativePath: string) { }
@@ -28,6 +31,17 @@ class ESMFileMigrationProvider implements MigrationProvider {
 }
 
 async function migrateToLatest() {
+  const dialect = new PostgresDialect({
+    pool: new Pool({
+      host: "localhost",
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      max: 10
+    })
+  });
+  
+  const db = new Kysely<Database>({dialect});
   const migrator = new Migrator({
     db: db,
     provider: new ESMFileMigrationProvider("migrations")

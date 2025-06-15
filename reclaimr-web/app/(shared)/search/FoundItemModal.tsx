@@ -55,6 +55,7 @@ export default function FoundItemModal({
 
     const ret:boolean = await ItemApiService.uploadFoundItem({
       item_name: data.itemName,
+      item_category: "phone",
       item_images: data.itemImages,
       coordinates: {
         latitude: submitCoords.latitude,

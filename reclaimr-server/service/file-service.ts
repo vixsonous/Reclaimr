@@ -21,6 +21,7 @@ export class FileService {
   toWebp(quality = 100) {
     this.converted_buffer = sharp(this.buffer)
     .toFormat('webp')
+    .withMetadata()
     .webp({quality}).toBuffer();
 
     this.mimeType = 'image/webp';
@@ -30,6 +31,7 @@ export class FileService {
   resize(size: number = 1024) {
     this.converted_buffer = sharp(this.buffer)
       .resize(size, null, {withoutEnlargement: true, fit: 'inside'})
+      .withMetadata()
       .toBuffer()
 
     return this;
@@ -45,7 +47,7 @@ export class FileService {
     return {
       Bucket: process.env.CF_BUCKET,
       Body: await this.converted_buffer,
-      Key: params ? `${params.directory}/${this.file.filename}.${this.mimeType}`: `${this.file.filename}.${this.mimeType}`,
+      Key: params ? `${params.directory}/${this.file.originalname.split(".")[0]}.${this.mimeType.split("/")[1]}`: `${this.file.filename}.${this.mimeType}`,
       ContentType: this.mimeType
     } satisfies PutObjectCommandInput;
   }

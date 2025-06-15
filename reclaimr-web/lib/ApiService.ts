@@ -14,6 +14,7 @@ export interface ApiResponse<T> {
 
 export interface UploadFoundItemBody {
   item_name: string;
+  item_category: string;
   item_images: FileList;
   coordinates: Partial<ICoordinates>;
 }

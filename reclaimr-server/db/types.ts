@@ -10,7 +10,8 @@ import {
 export type ItemsCategory =
   "phone" | "wallet" | "keys" | "unknown";
 export interface Database {
-  item: ItemTable;
+  item_table: ItemTable;
+  item_image_table: ItemImageTable;
 }
 
 export interface ItemTable {
@@ -21,11 +22,11 @@ export interface ItemTable {
   found_latitude: number;
   found_longitude: number;
   found_by_anonymous: boolean;
-  found_by_anonymous_contact: JSONColumnType<{
+  found_by_anonymous_contact?: JSONColumnType<{
     contact_name: string;
     contact_number: string;
   }>; // JSON
-  found_by_user: number;
+  found_by_user?: number;
   created_at: ColumnType<Date, string | undefined, never>;
   updated_at: ColumnType<Date, string | undefined, never>;
 }
@@ -33,6 +34,23 @@ export interface ItemTable {
 export type Item = Selectable<ItemTable>;
 export type NewItem = Insertable<ItemTable>;
 export type UpdateItem = Updateable<ItemTable>;
+
+export interface InsertItemReturn {
+    id: number;
+    item_name: string;
+    item_category: ItemsCategory;
+    is_returned: boolean;
+    found_latitude: number;
+    found_longitude: number;
+    found_by_anonymous: boolean;
+    found_by_anonymous_contact: {
+        contact_name: string;
+        contact_number: string;
+    } | undefined;
+    found_by_user: number | undefined;
+    created_at: Date;
+    updated_at: Date;
+}
 
 export interface ItemImageTable {
   id: Generated<number>;
