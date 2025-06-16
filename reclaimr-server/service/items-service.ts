@@ -1,11 +1,12 @@
-import { CompleteMultipartUploadCommandOutput, ListBucketsCommand, S3Client} from '@aws-sdk/client-s3';
+import { CompleteMultipartUploadCommandOutput, S3Client} from '@aws-sdk/client-s3';
 import {Upload} from '@aws-sdk/lib-storage';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import { FileService } from './file-service';
-import { InsertItemImageReturn, InsertItemReturn, ItemsCategory, NewItem, NewItemImage } from '../db/types';
+import { InsertItemImageReturn, InsertItemReturn, NewItem, NewItemImage } from '../db/types';
 import { LogsService } from './logs-service';
 import { db } from '../db/database';
+import { ItemImageRepository, ItemRepository } from '../repository/items-repository';
 
 dotenv.config();
 
@@ -26,7 +27,8 @@ export const ITEMS_SERVICE_LOGS = {
   ERROR_IMAGE_CLOUD_UPLOAD: "There was an error uploading an image!",
   ERROR_IMAGE_DB_UPLOAD: "There was an error uploading an image to the database!",
   SUCCESS_ITEM_UPLOAD: "Successfully inserted item into the database!",
-  ERROR_ITEM_UPLOAD: "There was an error inserting item into the database!"
+  ERROR_ITEM_UPLOAD: "There was an error inserting item into the database!",
+  MISSING_OUT_DATA: "Missing output data!"
 }
 export class ItemImagesService {
 
@@ -61,7 +63,7 @@ export class ItemImagesService {
       const newItemImages: Array<NewItemImage> = uploadOutput.map(output => {
 
         if(!output.Key || !output.Location) {
-          throw new Error("Missing output data!");
+          throw new Error(ITEMS_SERVICE_LOGS.MISSING_OUT_DATA);
         }
 
         return {
@@ -84,13 +86,13 @@ export class ItemImagesService {
 
   static async uploadItemImagesToDatabase(newItemImages: NewItemImage[]): Promise<null | InsertItemImageReturn[]> {
     try {
-      const resultItemImages = await db.insertInto("item_image_table")
-        .values(newItemImages)
-        .returningAll()
-        .execute();
+      const resultItemImages = await ItemImageRepository.itemImageInsert(newItemImages);
+
+      if(resultItemImages === null) {
+        throw new Error(ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD);
+      }
 
       LogsService.log(ITEMS_SERVICE_LOGS.SUCCESS_IMAGE_DB_UPLOAD);
-
       return resultItemImages;
     } catch (error) {
       LogsService.error(ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD);
@@ -104,10 +106,11 @@ export class ItemsService {
 
   static async uploadItemToDatabase(newItem: NewItem): Promise<null | InsertItemReturn> {
     try {
-      const resultItem = await db.insertInto("item_table")
-        .values(newItem)
-        .returningAll()
-        .executeTakeFirstOrThrow();
+      const resultItem = await ItemRepository.itemTableInsert(newItem);
+
+      if(resultItem === null) {
+        throw new Error(ITEMS_SERVICE_LOGS.ERROR_ITEM_UPLOAD);
+      }
       
       LogsService.info(ITEMS_SERVICE_LOGS.SUCCESS_ITEM_UPLOAD);
       return resultItem;
