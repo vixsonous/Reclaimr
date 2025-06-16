@@ -3,7 +3,7 @@ import {Upload} from '@aws-sdk/lib-storage';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import { FileService } from './file-service';
-import { InsertItemReturn, ItemsCategory, NewItem, NewItemImage } from '../db/types';
+import { InsertItemImageReturn, InsertItemReturn, ItemsCategory, NewItem, NewItemImage } from '../db/types';
 import { LogsService } from './logs-service';
 import { db } from '../db/database';
 
@@ -21,14 +21,16 @@ const s3 = new S3Client({
 
 
 export const ITEMS_SERVICE_LOGS = {
-  SUCCESS_IMAGE_UPLOAD: "Successfully uploaded the images!",
-  ERROR_IMAGE_UPLOAD: "There was an error uploading an image!",
+  SUCCESS_IMAGE_CLOUD_UPLOAD: "Successfully uploaded the images!",
+  SUCCESS_IMAGE_DB_UPLOAD: "Successfully inserted the images to the database!",
+  ERROR_IMAGE_CLOUD_UPLOAD: "There was an error uploading an image!",
+  ERROR_IMAGE_DB_UPLOAD: "There was an error uploading an image to the database!",
   SUCCESS_ITEM_UPLOAD: "Successfully inserted item into the database!",
   ERROR_ITEM_UPLOAD: "There was an error inserting item into the database!"
 }
-export class ItemsService {
+export class ItemImagesService {
 
-  static async uploadObjectCommand(files: Express.Multer.File[], directory?: string): Promise<boolean | CompleteMultipartUploadCommandOutput[]> {
+  static async uploadObjectCommand(files: Express.Multer.File[], directory?: string): Promise<null | CompleteMultipartUploadCommandOutput[]> {
     
     try {
       const uploads = await Promise.all(files.map(async f => new Upload({
@@ -42,24 +44,19 @@ export class ItemsService {
         });
       });
 
-      LogsService.log(ITEMS_SERVICE_LOGS.SUCCESS_IMAGE_UPLOAD);
-      console.log(uploads);
+      LogsService.log(ITEMS_SERVICE_LOGS.SUCCESS_IMAGE_CLOUD_UPLOAD);
       return uploads;
     } catch (error) {
       LogsService.error(error);
-      return false;
+      return null;
     }
   }
 
-  
-}
-
-export class ItemsDatabaseService {
   static async convertR2UploadOutputToNewItemImages(
     uploadOutput: CompleteMultipartUploadCommandOutput[], 
     item_id: number,
     item_owner_id: number,
-  ): Promise<NewItemImage[] | boolean> {
+  ): Promise<NewItemImage[] | null> {
     try {
       const newItemImages: Array<NewItemImage> = uploadOutput.map(output => {
 
@@ -69,11 +66,11 @@ export class ItemsDatabaseService {
 
         return {
           image_relative_path: output.Key,
-          image_url: output.Location,
           item_id: item_id,
           image_owner_id: item_owner_id,
           metadata: JSON.stringify({
-            lastModifiedDate: new Date().toISOString()
+            lastModifiedDate: new Date().toISOString(),
+            name: output.Key.split("/")[output.Key.split("/").length - 1].split(".")[0]
           })
         }
       });
@@ -81,11 +78,31 @@ export class ItemsDatabaseService {
       return newItemImages;
     } catch(error) {
       LogsService.error(error);
-      return false;
+      return null;
     }
   }
 
-  static async uploadItemToDatabase(newItem: NewItem): Promise<boolean | InsertItemReturn> {
+  static async uploadItemImagesToDatabase(newItemImages: NewItemImage[]): Promise<null | InsertItemImageReturn[]> {
+    try {
+      const resultItemImages = await db.insertInto("item_image_table")
+        .values(newItemImages)
+        .returningAll()
+        .execute();
+
+      LogsService.log(ITEMS_SERVICE_LOGS.SUCCESS_IMAGE_DB_UPLOAD);
+
+      return resultItemImages;
+    } catch (error) {
+      LogsService.error(ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD);
+      console.error(error);
+      return null;
+    }
+  }
+}
+
+export class ItemsService {
+
+  static async uploadItemToDatabase(newItem: NewItem): Promise<null | InsertItemReturn> {
     try {
       const resultItem = await db.insertInto("item_table")
         .values(newItem)
@@ -97,7 +114,7 @@ export class ItemsDatabaseService {
     } catch(error) {
       console.log(error);
       LogsService.error(error);
-      return false;
+      return null;
     }
   }
 }

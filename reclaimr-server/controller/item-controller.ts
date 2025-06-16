@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../class/api-class";
-import { ITEMS_SERVICE_LOGS, ItemsDatabaseService, ItemsService } from "../service/items-service";
-import { NewItem } from "../db/types";
+import { ITEMS_SERVICE_LOGS, ItemsService, ItemImagesService } from "../service/items-service";
+import { InsertItemReturn, NewItem } from "../db/types";
+import { CompleteMultipartUploadCommandOutput } from "@aws-sdk/client-s3";
 
-export const uploadFoundItem = (req: Request, res: Response) => {
+export const uploadFoundItem = async (req: Request, res: Response) => {
 
   const files: Express.Multer.File[] | undefined =  req.files as Express.Multer.File[];
   if(files === undefined) {
     res.status(500).json(new ApiResponse('No files uploaded!', undefined, false));
   }
+
+  const user_id = 9189;
 
   const newItem = {
     item_name: req.body.item_name,
@@ -20,25 +23,51 @@ export const uploadFoundItem = (req: Request, res: Response) => {
     found_by_user: 99
   } satisfies NewItem;
 
-  const itemUploadResult = ItemsDatabaseService.uploadItemToDatabase(newItem);
+  const itemUploadResult = await ItemsService.uploadItemToDatabase(newItem);
 
   if(!itemUploadResult) {
     new ApiResponse(
-      ITEMS_SERVICE_LOGS.ERROR_IMAGE_UPLOAD, 
+      ITEMS_SERVICE_LOGS.ERROR_ITEM_UPLOAD, 
       undefined, 
       false
     ).error(res);
   }
 
-  const r2UploadResult = ItemsService.uploadObjectCommand(files, "users");
+  const item_id = (itemUploadResult as InsertItemReturn).id;
+  const directory = "users/"+user_id+"/item/"+ item_id;
 
-  if(!r2UploadResult) {
+  const r2UploadResult = await ItemImagesService.uploadObjectCommand(files, directory);
+
+  if(r2UploadResult === null) {
     new ApiResponse(
-      ITEMS_SERVICE_LOGS.ERROR_IMAGE_UPLOAD, 
+      ITEMS_SERVICE_LOGS.ERROR_IMAGE_CLOUD_UPLOAD, 
       undefined, 
       false
     ).error(res);
+    return;
   }
 
+  const newItemImages = await ItemImagesService.convertR2UploadOutputToNewItemImages(r2UploadResult, item_id, user_id);
+
+  if(newItemImages === null) {
+    new ApiResponse(
+      ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD, 
+      undefined, 
+      false
+    ).error(res);
+    return;
+  }
+  
+  const insertedItemImages = await ItemImagesService.uploadItemImagesToDatabase(newItemImages);
+
+  if(insertedItemImages === null) {
+    new ApiResponse(
+      ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD, 
+      undefined, 
+      false
+    ).error(res);
+    return;
+  }
+  
   new ApiResponse('qweqwe!', true, true).success(res);
 }

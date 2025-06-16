@@ -55,15 +55,11 @@ export interface InsertItemReturn {
 export interface ItemImageTable {
   id: Generated<number>;
   item_id: number;
-  image_url: string;
   image_relative_path: string;
   image_owner_id: number;
   metadata: JSONColumnType<{
-    lastModified: number;
     lastModifiedDate: string;
     name: string;
-    size: number;
-    type: string;
   }>;
   created_at: ColumnType<Date, string | undefined, never>;
   updated_at: ColumnType<Date, string | undefined, never>;
@@ -72,3 +68,16 @@ export interface ItemImageTable {
 export type ItemImage = Selectable<ItemImageTable>;
 export type NewItemImage = Insertable<ItemImageTable>;
 export type UpdateItemImage = Updateable<ItemImageTable>;
+
+export interface InsertItemImageReturn {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    item_id: number;
+    image_relative_path: string;
+    image_owner_id: number;
+    metadata: {
+        lastModifiedDate: string;
+        name: string;
+    };
+}

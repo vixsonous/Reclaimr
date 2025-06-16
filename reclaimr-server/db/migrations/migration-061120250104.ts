@@ -20,7 +20,6 @@ export async function up(db: Kysely<any>): Promise<void> {
     .createTable("item_image_table")
     .addColumn("id","serial", (col) => col.primaryKey())
     .addColumn("item_id", "integer", (col) => col.notNull().defaultTo(-1))
-    .addColumn("image_url", "varchar", (col) => col.notNull())
     .addColumn("image_relative_path", "varchar", (col) => col.notNull())
     .addColumn("image_owner_id", "integer", (col) => col.notNull().defaultTo(-1))
     .addColumn("metadata", "json", (col) => col.defaultTo(JSON.stringify({})))

@@ -12,6 +12,7 @@ import FileUploadInput from "./FileUploadInput";
 import { ApiResponse, ItemApiService } from "@/lib/ApiService";
 import { toast } from "sonner";
 import Loader from "@/app/_components/Loader";
+import { CategoryComboBox } from "@/app/_components/CategoryComboBox";
 
 export default function FoundItemModal({
   setCoords
@@ -25,6 +26,8 @@ export default function FoundItemModal({
     latitude: undefined,
     longitude: undefined
   });
+  const [category, setCategory] = React.useState("")
+
   
   const setLocation = (e:React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -55,7 +58,7 @@ export default function FoundItemModal({
 
     const ret:boolean = await ItemApiService.uploadFoundItem({
       item_name: data.itemName,
-      item_category: "phone",
+      item_category: category,
       item_images: data.itemImages,
       coordinates: {
         latitude: submitCoords.latitude,
@@ -72,9 +75,10 @@ export default function FoundItemModal({
   }) : [];
   return (
     <Modal>
-      <form onSubmit={handleSubmit(onSubmit)} action="">
+      <form onSubmit={handleSubmit(onSubmit)} action="" className="flex flex-col">
         <Input {...register("itemName", {required: true, maxLength: 10})} placeholder="Name of the item"/>
         {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
+        <CategoryComboBox valueParams={category} setValueParams={setCategory} />
         <FileUploadInput type="file" {...register("itemImages")}/>
         <section>
           <h1>Images Uploaded</h1>
