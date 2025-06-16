@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { ApiResponse } from "../class/api-class";
-import { ITEMS_SERVICE_LOGS, ItemsService, ItemImagesService } from "../service/items-service";
-import { InsertItemReturn, NewItem } from "../db/types";
-import { CompleteMultipartUploadCommandOutput } from "@aws-sdk/client-s3";
+import { ApiResponse } from "../utils/api-class";
+import { ITEMS_SERVICE_LOGS } from "../service/items-service";
+import { AuthService } from "../service/auth-service";
+import { Item } from "../model/item";
+import { ItemImage } from "../model/item-image";
 
 export const uploadFoundItem = async (req: Request, res: Response) => {
 
@@ -11,54 +12,32 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
     res.status(500).json(new ApiResponse('No files uploaded!', undefined, false));
   }
 
+  await AuthService.isAuthenticated();
+
   const user_id = 9189;
 
-  const newItem = {
-    item_name: req.body.item_name,
-    item_category: req.body.item_category,
-    found_latitude: req.body.coordinates.latitude,
-    found_longitude: req.body.coordinates.longitude,
-    found_by_anonymous: false,
-    is_returned: false,
-    found_by_user: 99
-  } satisfies NewItem;
+  const itemUploadResult = await new Item(
+    req.body.item_name,
+    req.body.item_category,
+    req.body.coordinates.latitude,
+    req.body.coordinates.longitude,
+    false,
+    false,
+    user_id
+  ).create();
 
-  const itemUploadResult = await ItemsService.uploadItemToDatabase(newItem);
-
-  if(!itemUploadResult) {
+  if(itemUploadResult === null) {
     new ApiResponse(
       ITEMS_SERVICE_LOGS.ERROR_ITEM_UPLOAD, 
       undefined, 
       false
     ).error(res);
-  }
-
-  const item_id = (itemUploadResult as InsertItemReturn).id;
-  const directory = "users/"+user_id+"/item/"+ item_id;
-
-  const r2UploadResult = await ItemImagesService.uploadObjectCommand(files, directory);
-
-  if(r2UploadResult === null) {
-    new ApiResponse(
-      ITEMS_SERVICE_LOGS.ERROR_IMAGE_CLOUD_UPLOAD, 
-      undefined, 
-      false
-    ).error(res);
     return;
   }
 
-  const newItemImages = await ItemImagesService.convertR2UploadOutputToNewItemImages(r2UploadResult, item_id, user_id);
+  const item_id = itemUploadResult.id;
 
-  if(newItemImages === null) {
-    new ApiResponse(
-      ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD, 
-      undefined, 
-      false
-    ).error(res);
-    return;
-  }
-  
-  const insertedItemImages = await ItemImagesService.uploadItemImagesToDatabase(newItemImages);
+  const insertedItemImages = await new ItemImage(files, item_id, user_id).create();
 
   if(insertedItemImages === null) {
     new ApiResponse(
@@ -69,5 +48,5 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
     return;
   }
   
-  new ApiResponse('qweqwe!', true, true).success(res);
+  new ApiResponse('Successfully submitted lost item!', true, true).success(res);
 }
