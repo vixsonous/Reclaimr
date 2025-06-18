@@ -5,6 +5,7 @@ import Map, { Marker } from "react-map-gl/mapbox";
 import FoundItemModal from "./FoundItemModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/redux-store/store";
+import { UserResponse } from "@supabase/supabase-js";
 
 export default function MapClient() {
 
@@ -16,7 +17,6 @@ export default function MapClient() {
   });
 
   const items = useSelector((state: RootState) => state.mapItems);
-
   const markers = useMemo(() => items.map(i => <Marker key={i.id} longitude={i.longitude} latitude={i.latitude}/>), [items]);
   
   return (

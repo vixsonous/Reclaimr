@@ -8,7 +8,8 @@ services:
       - "5432:5432"
     volumes:
       - reclaimr_postgres:/var/lib/postgresql/data
-  reclaimerserver:
+  reclaimrserver:
+    container_name: reclaimrserver
     build:
       context: ./reclaimr-server
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
   reclaimrweb:
+    container_name: reclaimrweb
     build:
       context: ./reclaimr-web
       dockerfile: Dockerfile
@@ -31,6 +33,8 @@ services:
     environment:
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - reclaimrserver
 volumes:
   reclaimr_postgres:
   web_node_modules:

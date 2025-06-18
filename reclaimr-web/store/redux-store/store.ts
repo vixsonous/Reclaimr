@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import mapItemSlice from '../redux-slice/map-items-slice';
+import userAuthSlice from '../redux-slice/user-auth-slice';
 
 export const store = configureStore({
   reducer: {
-    mapItems: mapItemSlice
+    mapItems: mapItemSlice,
+    user: userAuthSlice
   }
 });
 

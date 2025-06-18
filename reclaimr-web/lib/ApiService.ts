@@ -4,12 +4,11 @@ import { FieldValues } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
 
-const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
+export const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
 
 export interface ApiResponse<T> {
   message: string;
-  data: T;
-  success: boolean;
+  data: T | undefined;
 }
 
 export interface UploadFoundItemBody {
@@ -19,13 +18,12 @@ export interface UploadFoundItemBody {
   coordinates: Partial<ICoordinates>;
 }
 
-export class ItemApiService {
-  static UPLOAD_FOUND_ITEM = `${BASE_URL}/api/upload-found-item`;
-
+export class ApiService {
   static async get<T>(url: string, requestConfig?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    return axios.get(url, requestConfig)
+    return axios.get(`${BASE_URL}${url}`, requestConfig)
       .then(res => res.data)
       .catch((err: AxiosError) => {
+        console.log(err);
         toast.error("There was an error!", {
           description: (err.response?.data as ApiResponse<T>).message
         });
@@ -35,7 +33,7 @@ export class ItemApiService {
   }
 
   static async post<T>(url: string, body: T, requestConfig?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    return axios.post(url, body, requestConfig)
+    return axios.post(`${BASE_URL}${url}`, body, requestConfig)
       .then(res => res.data)
       .catch((err: AxiosError) => {
         toast.error("There was an error!", {
@@ -45,6 +43,12 @@ export class ItemApiService {
         return undefined;
       });
   }
+}
+
+export class ItemApiService {
+  static UPLOAD_FOUND_ITEM = `/api/upload-found-item`;
+
+  
   static async uploadFoundItem(data: UploadFoundItemBody): Promise<boolean> {
     const UploadFoundItemResponseSchema = z.object({
       message: z.string(),
@@ -52,7 +56,7 @@ export class ItemApiService {
       success: z.boolean(),
     });
     const response: ApiResponse<UploadFoundItemBody> = 
-      await this.post<UploadFoundItemBody>(
+      await ApiService.post<UploadFoundItemBody>(
         this.UPLOAD_FOUND_ITEM, 
         data,
         {

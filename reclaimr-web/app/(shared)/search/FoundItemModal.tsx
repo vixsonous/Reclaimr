@@ -5,7 +5,7 @@ import Modal from "@/app/_components/Modal";
 import { addMapItem } from "@/store/redux-slice/map-items-slice";
 import { ICoordinates } from "@/types/map-types";
 import React, { Dispatch, SetStateAction, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { v4 } from "uuid";
 import {FieldValues, useForm} from "react-hook-form";
 import FileUploadInput from "./FileUploadInput";
@@ -13,6 +13,9 @@ import { ApiResponse, ItemApiService } from "@/lib/ApiService";
 import { toast } from "sonner";
 import Loader from "@/app/_components/Loader";
 import { CategoryComboBox } from "@/app/_components/CategoryComboBox";
+import { UserResponse } from "@supabase/supabase-js";
+import { RootState } from "@/store/redux-store/store";
+import Signin from "./Signin";
 
 export default function FoundItemModal({
   setCoords
@@ -32,7 +35,7 @@ export default function FoundItemModal({
   const setLocation = (e:React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     toast("Retrieving location", {
-      description: <h1>"Retrieving location data. Please wait"</h1>
+      description: <h1>Retrieving location data. Please wait</h1>
     });
     navigator.geolocation.getCurrentPosition((coords) => {
       setCoords({latitude: coords.coords.latitude, longitude: coords.coords.longitude});
@@ -73,26 +76,38 @@ export default function FoundItemModal({
 
     return URL.createObjectURL(file);
   }) : [];
+
+  const userAuth: UserResponse | null = useSelector((state: RootState) => state.user.userSession);
+  console.log(userAuth);
   return (
-    <Modal>
-      <form onSubmit={handleSubmit(onSubmit)} action="" className="flex flex-col">
-        <Input {...register("itemName", {required: true, maxLength: 10})} placeholder="Name of the item"/>
-        {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
-        <CategoryComboBox valueParams={category} setValueParams={setCategory} />
-        <FileUploadInput type="file" {...register("itemImages")}/>
-        <section>
-          <h1>Images Uploaded</h1>
-          <div className="flex flex-row flex-wrap">
-            {f.map(url => <img className="aspect-square object-cover" width={100} height={100} key={url} src={url}/>)}
-          </div>
-        </section>
-        <Button onClick={setLocation}>
-          Confirm location <Loader />
-        </Button>
-        <Button role="submit">
-          Submit
-        </Button>
-      </form>
+    <Modal trigger={"Found an item?"}>
+      {
+        userAuth === null ? (
+          <>
+          <div>Log in to report your findings!</div>
+          <Signin />
+          </>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} action="" className="flex flex-col">
+            <Input {...register("itemName", {required: true, maxLength: 10})} placeholder="Name of the item"/>
+            {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
+            <CategoryComboBox valueParams={category} setValueParams={setCategory} />
+            <FileUploadInput type="file" {...register("itemImages")}/>
+            <section>
+              <h1>Images Uploaded</h1>
+              <div className="flex flex-row flex-wrap">
+                {f.map(url => <img className="aspect-square object-cover" width={100} height={100} key={url} src={url}/>)}
+              </div>
+            </section>
+            <Button onClick={setLocation}>
+              Confirm location <Loader />
+            </Button>
+            <Button role="submit">
+              Submit
+            </Button>
+          </form>
+        )
+      }
     </Modal>
   )
 }

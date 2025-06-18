@@ -11,7 +11,9 @@ export class AuthService {
     try {
       const isAuth = await supabase.auth.getUser();
 
-      console.log(isAuth.error);
+      if(isAuth.error) {
+        throw new Error(isAuth.error.message);
+      }
 
       return isAuth;
     } catch (error) {
@@ -19,5 +21,9 @@ export class AuthService {
       console.log(error);
       return null;
     }
+  }
+
+  static async signinWithGoogle() {
+    
   }
 }

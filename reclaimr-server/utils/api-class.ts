@@ -2,19 +2,16 @@ import { Response } from "express";
 
 export class ApiResponse<T> {
   private _message: string = '';
-  private _data: T | null = null;
-  private _success: boolean = true;
-  constructor(message: string, data: T | null, success: boolean) {
-    this._message = message;
+  private _data: T | undefined = undefined;
+  constructor(message?: string, data?: T | undefined) {
+    this._message = message || "";
     this._data = data;
-    this._success = success;
   }
 
   error(res: Response, status: number = 500) {
     res.status(status).json({
       message: this._message,
       data: this._data,
-      success: this._success
     })
   }
 
@@ -22,7 +19,17 @@ export class ApiResponse<T> {
     res.status(status).json({
       message: this._message,
       data: this._data,
-      success: this._success
     })
+  }
+
+  unauthorized(res: Response, status: number = 401) {
+    res.status(status).json({
+      message: this._message,
+      data: this._data,
+    })
+  }
+
+  redirect(res: Response, url: string) {
+    res.status(302).redirect(url);
   }
 }
