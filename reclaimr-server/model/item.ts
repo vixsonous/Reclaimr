@@ -8,7 +8,7 @@ export class Item {
   private _found_longitude: number;
   private _found_by_anonymous: boolean;
   private _is_returned: boolean;
-  private _found_by_user: number;
+  private _found_by_user: string;
 
   constructor(
     item_name: string,
@@ -17,7 +17,7 @@ export class Item {
     found_longitude: number,
     found_by_anonymous: boolean,
     is_returned: boolean,
-    found_by_user: number
+    found_by_user: string
   ) {
     this._item_name = item_name;
     this._item_category = item_category;

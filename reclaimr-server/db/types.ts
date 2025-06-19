@@ -26,7 +26,7 @@ export interface ItemTable {
     contact_name: string;
     contact_number: string;
   }>; // JSON
-  found_by_user?: number;
+  found_by_user?: string;
   created_at: ColumnType<Date, string | undefined, never>;
   updated_at: ColumnType<Date, string | undefined, never>;
 }
@@ -47,7 +47,7 @@ export interface InsertItemReturn {
         contact_name: string;
         contact_number: string;
     } | undefined;
-    found_by_user: number | undefined;
+    found_by_user: string | undefined;
     created_at: Date;
     updated_at: Date;
 }
@@ -56,7 +56,7 @@ export interface ItemImageTable {
   id: Generated<number>;
   item_id: number;
   image_relative_path: string;
-  image_owner_id: number;
+  image_owner_id: string;
   metadata: JSONColumnType<{
     lastModifiedDate: string;
     name: string;
@@ -75,7 +75,7 @@ export interface InsertItemImageReturn {
     updated_at: Date;
     item_id: number;
     image_relative_path: string;
-    image_owner_id: number;
+    image_owner_id: string;
     metadata: {
         lastModifiedDate: string;
         name: string;

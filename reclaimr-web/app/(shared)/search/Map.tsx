@@ -6,6 +6,7 @@ import FoundItemModal from "./FoundItemModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/redux-store/store";
 import { UserResponse } from "@supabase/supabase-js";
+import LookItemModal from "./LookItemModal";
 
 export default function MapClient() {
 
@@ -34,6 +35,7 @@ export default function MapClient() {
         {markers}
       </Map>
       <FoundItemModal setCoords={setCoords}/>
+      <LookItemModal />
     </>
   )
 }

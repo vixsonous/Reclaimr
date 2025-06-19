@@ -7,8 +7,8 @@ import { LogsService } from "../service/logs-service";
 export class ItemImage {
   private _files: Express.Multer.File[];
   private _item_id: number;
-  private _user_id: number;
-  constructor(files: Express.Multer.File[], item_id: number, user_id: number) {
+  private _user_id: string;
+  constructor(files: Express.Multer.File[], item_id: number, user_id: string) {
     this._files = files;
     this._item_id = item_id;
     this._user_id = user_id;

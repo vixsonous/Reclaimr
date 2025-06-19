@@ -28,7 +28,12 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
     return;
   }
 
-  const user_id = 9189;
+  if(userData.data.user === null) {
+    new ApiResponse(AUTH_SERVICE_LOGS.NOT_AUTHENTICATED, false).unauthorized(res);
+    return;
+  }
+
+  const user_id = userData.data.user.id;
 
   const itemUploadResult = await new Item(
     req.body.item_name,

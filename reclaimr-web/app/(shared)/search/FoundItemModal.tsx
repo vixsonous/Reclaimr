@@ -7,7 +7,7 @@ import { ICoordinates } from "@/types/map-types";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 } from "uuid";
-import {FieldValues, useForm} from "react-hook-form";
+import {Control, FieldValues, useForm, useWatch} from "react-hook-form";
 import FileUploadInput from "./FileUploadInput";
 import { ApiResponse, ItemApiService } from "@/lib/ApiService";
 import { toast } from "sonner";
@@ -17,6 +17,26 @@ import { UserResponse } from "@supabase/supabase-js";
 import { RootState } from "@/store/redux-store/store";
 import Signin from "./Signin";
 
+function DisplayImages({control}: {control: Control}) {
+  const files:Record<string, File> = useWatch({
+    control,
+    name: "itemImages"
+  });
+
+  const f = files ? Object.keys(files).map(sFile => {
+    const file = files[sFile];
+
+    return URL.createObjectURL(file);
+  }) : [];
+  
+  return <section>
+    <h1>Images Uploaded</h1>
+    <div className="flex flex-row flex-wrap">
+      {f.map(url => <img className="aspect-square object-cover" width={100} height={100} key={url} src={url}/>)}
+    </div>
+  </section>
+}
+
 export default function FoundItemModal({
   setCoords
 } : {
@@ -24,7 +44,7 @@ export default function FoundItemModal({
 }) {
 
   const dispatch = useDispatch();
-  const {register, handleSubmit, watch, formState: {errors} } = useForm();
+  const {register, handleSubmit, control, formState: {errors} } = useForm();
   const [submitCoords, setSubmitCoords] = useState<Partial<ICoordinates>>({
     latitude: undefined,
     longitude: undefined
@@ -70,12 +90,12 @@ export default function FoundItemModal({
     });
   };
 
-  const files:Record<string, File> = watch("itemImages");
-  const f = files ? Object.keys(files).map(sFile => {
-    const file = files[sFile];
+  // const files:Record<string, File> = useWatch({name: "itemImages"});
+  // const f = files ? Object.keys(files).map(sFile => {
+  //   const file = files[sFile];
 
-    return URL.createObjectURL(file);
-  }) : [];
+  //   return URL.createObjectURL(file);
+  // }) : [];
 
   const userAuth: UserResponse | null = useSelector((state: RootState) => state.user.userSession);
   console.log(userAuth);
@@ -93,12 +113,7 @@ export default function FoundItemModal({
             {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
             <CategoryComboBox valueParams={category} setValueParams={setCategory} />
             <FileUploadInput type="file" {...register("itemImages")}/>
-            <section>
-              <h1>Images Uploaded</h1>
-              <div className="flex flex-row flex-wrap">
-                {f.map(url => <img className="aspect-square object-cover" width={100} height={100} key={url} src={url}/>)}
-              </div>
-            </section>
+            <DisplayImages control={control}/>
             <Button onClick={setLocation}>
               Confirm location <Loader />
             </Button>

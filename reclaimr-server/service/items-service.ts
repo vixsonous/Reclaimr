@@ -19,8 +19,6 @@ const s3 = new S3Client({
   }
 });
 
-
-
 export const ITEMS_SERVICE_LOGS = {
   SUCCESS_IMAGE_CLOUD_UPLOAD: "Successfully uploaded the images!",
   SUCCESS_IMAGE_DB_UPLOAD: "Successfully inserted the images to the database!",
@@ -57,7 +55,7 @@ export class ItemImagesService {
   static async convertR2UploadOutputToNewItemImages(
     uploadOutput: CompleteMultipartUploadCommandOutput[], 
     item_id: number,
-    item_owner_id: number,
+    item_owner_id: string,
   ): Promise<NewItemImage[] | null> {
     try {
       const newItemImages: Array<NewItemImage> = uploadOutput.map(output => {
