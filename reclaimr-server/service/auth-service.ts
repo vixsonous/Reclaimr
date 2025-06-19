@@ -7,9 +7,9 @@ export const AUTH_SERVICE_LOGS = {
 }
 
 export class AuthService {
-  static async isAuthenticated(): Promise<UserResponse | null> {
+  static async isAuthenticated(accessToken: string): Promise<UserResponse | null> {
     try {
-      const isAuth = await supabase.auth.getUser();
+      const isAuth = await supabase.auth.getUser(accessToken);
 
       if(isAuth.error) {
         throw new Error(isAuth.error.message);

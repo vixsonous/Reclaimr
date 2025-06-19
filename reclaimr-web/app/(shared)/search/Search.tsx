@@ -3,19 +3,19 @@
 import { store } from "@/store/redux-store/store";
 import { Provider, useDispatch } from "react-redux";
 import MapClient from "./Map";
-import { UserResponse } from "@supabase/supabase-js";
-import { setUserAuth } from "@/store/redux-slice/user-auth-slice";
+import {QueryClientProvider, useQuery} from '@tanstack/react-query';
 import SetAuth from "@/components/auth/set-auth";
+import axios from "axios";
+import { queryClient } from "@/lib/utils";
 
-export default function SearchClient({
-  userResponse
-}: {
-  userResponse: UserResponse | null
-}) {
+export default function SearchClient() {
+  
   return (
     <Provider store={store}>
-      <SetAuth userResponse={userResponse}/>
-      <MapClient />
+      <QueryClientProvider client={queryClient}>
+        <SetAuth/>
+        <MapClient />
+      </QueryClientProvider>
     </Provider>
   )
 }

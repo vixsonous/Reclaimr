@@ -4,7 +4,8 @@ import { FieldValues } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
 
-export const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
+export const BASE_CLIENT_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_CLIENT_URL}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
+export const BASE_SERVER_URL = `${process.env.NEXT_PUBLIC_BACKEND_BASE_SERVER_URL}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
 
 export interface ApiResponse<T> {
   message: string;
@@ -20,40 +21,23 @@ export interface UploadFoundItemBody {
 
 export class ApiService {
   static async get<T>(url: string, requestConfig?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    return axios.get(`${BASE_URL}${url}`, requestConfig)
-      .then(res => res.data)
-      .catch((err: AxiosError) => {
-        console.log(err);
-        toast.error("There was an error!", {
-          description: (err.response?.data as ApiResponse<T>).message
-        });
-
-        return undefined;
-      });
+    return axios.get(`${BASE_CLIENT_URL}${url}`, requestConfig)
+    .then(res => res.data)
+    .catch(err => console.log(err))
   }
 
   static async post<T>(url: string, body: T, requestConfig?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    return axios.post(`${BASE_URL}${url}`, body, requestConfig)
-      .then(res => res.data)
-      .catch((err: AxiosError) => {
-        toast.error("There was an error!", {
-          description: (err.response?.data as ApiResponse<T>).message
-        });
-
-        return undefined;
-      });
+    return axios.post(`${BASE_CLIENT_URL}${url}`, body, requestConfig).then(res => res.data);
   }
 }
 
 export class ItemApiService {
   static UPLOAD_FOUND_ITEM = `/api/upload-found-item`;
-
   
   static async uploadFoundItem(data: UploadFoundItemBody): Promise<boolean> {
     const UploadFoundItemResponseSchema = z.object({
       message: z.string(),
       data: z.boolean(),
-      success: z.boolean(),
     });
     const response: ApiResponse<UploadFoundItemBody> = 
       await ApiService.post<UploadFoundItemBody>(
@@ -62,7 +46,8 @@ export class ItemApiService {
         {
           headers: {
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          withCredentials: true
         }
       );
     if(!response) return false;

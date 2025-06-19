@@ -4,19 +4,27 @@ import { ITEMS_SERVICE_LOGS } from "../service/items-service";
 import { AUTH_SERVICE_LOGS, AuthService } from "../service/auth-service";
 import { Item } from "../model/item";
 import { ItemImage } from "../model/item-image";
+import { getAccessToken } from "../utils/server-util";
 
 export const uploadFoundItem = async (req: Request, res: Response) => {
 
   const files: Express.Multer.File[] | undefined =  req.files as Express.Multer.File[];
   if(files === undefined) {
-    new ApiResponse('No files uploaded!').error(res);
+    new ApiResponse('No files uploaded!', false).error(res);
     return;
   }
 
-  const userData = await AuthService.isAuthenticated();
+  const accessToken = getAccessToken(req);
+
+  if(accessToken === undefined) {
+    new ApiResponse(AUTH_SERVICE_LOGS.NOT_AUTHENTICATED, false).unauthorized(res);
+    return;
+  } 
+
+  const userData = await AuthService.isAuthenticated(accessToken);
 
   if(userData === null) {
-    new ApiResponse(AUTH_SERVICE_LOGS.NOT_AUTHENTICATED, undefined).unauthorized(res);
+    new ApiResponse(AUTH_SERVICE_LOGS.NOT_AUTHENTICATED, false).unauthorized(res);
     return;
   }
 
@@ -33,7 +41,7 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
   ).create();
 
   if(itemUploadResult === null) {
-    new ApiResponse(ITEMS_SERVICE_LOGS.ERROR_ITEM_UPLOAD, undefined).error(res);
+    new ApiResponse(ITEMS_SERVICE_LOGS.ERROR_ITEM_UPLOAD, false).error(res);
     return;
   }
 
@@ -42,7 +50,7 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
   const insertedItemImages = await new ItemImage(files, item_id, user_id).create();
 
   if(insertedItemImages === null) {
-    new ApiResponse(ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD, undefined).error(res);
+    new ApiResponse(ITEMS_SERVICE_LOGS.ERROR_IMAGE_DB_UPLOAD, false).error(res);
     return;
   }
   

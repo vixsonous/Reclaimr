@@ -29,7 +29,7 @@ export class ApiResponse<T> {
     })
   }
 
-  redirect(res: Response, url: string) {
-    res.status(302).redirect(url);
+  static redirect(res: Response, url: string) {
+    res.header('Access-Control-Allow-Origin', '*').status(302).redirect(url);
   }
 }
