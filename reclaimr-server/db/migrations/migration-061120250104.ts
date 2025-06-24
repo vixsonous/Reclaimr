@@ -6,6 +6,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("id","serial", (col) => col.primaryKey())
     .addColumn("item_name", "varchar", (col) => col.notNull().defaultTo("unidentified item"))
     .addColumn("item_category", "varchar", (col) => col.notNull().defaultTo("unknown"))
+    .addColumn("item_description", "varchar", (col) => col.notNull().defaultTo(""))
     .addColumn("is_returned", "boolean", (col) => col.notNull().defaultTo(false))
     .addColumn("found_latitude", "double precision", (col) => col.notNull().defaultTo(0))
     .addColumn("found_longitude", "double precision", (col) => col.notNull().defaultTo(0))

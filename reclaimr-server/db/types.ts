@@ -18,6 +18,7 @@ export interface ItemTable {
   id: Generated<number>;
   item_name: string;
   item_category: ItemsCategory;
+  item_description: string;
   is_returned: boolean;
   found_latitude: number;
   found_longitude: number;
@@ -39,6 +40,7 @@ export interface InsertItemReturn {
     id: number;
     item_name: string;
     item_category: ItemsCategory;
+    item_description: string;
     is_returned: boolean;
     found_latitude: number;
     found_longitude: number;

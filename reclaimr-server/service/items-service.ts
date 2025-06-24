@@ -6,7 +6,7 @@ import { FileService } from './file-service';
 import { InsertItemImageReturn, InsertItemReturn, NewItem, NewItemImage } from '../db/types';
 import { LogsService } from './logs-service';
 import { db } from '../db/database';
-import { ItemImageRepository, ItemRepository } from '../repository/items-repository';
+import { ItemImageRepository, ItemRepository, ItemSearchFields } from '../repository/items-repository';
 
 dotenv.config();
 
@@ -26,7 +26,11 @@ export const ITEMS_SERVICE_LOGS = {
   ERROR_IMAGE_DB_UPLOAD: "There was an error uploading an image to the database!",
   SUCCESS_ITEM_UPLOAD: "Successfully inserted item into the database!",
   ERROR_ITEM_UPLOAD: "There was an error inserting item into the database!",
-  MISSING_OUT_DATA: "Missing output data!"
+  MISSING_OUT_DATA: "Missing output data!",
+  FIND_ITEM_ERROR: "There was an error looking for an item!",
+  FIND_ITEMS_ERROR: "There was an error looking for the items!",
+  FIND_ITEM_SUCCESS: "Successfully looked for an item!",
+  FIND_ITEMS_SUCCESS: "Successfully looked for items!"
 }
 export class ItemImagesService {
 
@@ -115,6 +119,37 @@ export class ItemsService {
     } catch(error) {
       console.log(error);
       LogsService.error(error);
+      return null;
+    }
+  }
+
+  static async findSingleItem(id: number) {
+    try {
+      const resultItem = await ItemRepository.itemSearch({id});
+
+      if(resultItem === null) {
+        throw new Error(ITEMS_SERVICE_LOGS.FIND_ITEM_ERROR);
+      }
+      
+      LogsService.log(ITEMS_SERVICE_LOGS.FIND_ITEM_SUCCESS);
+      return resultItem;
+    } catch (error) {
+      LogsService.error(ITEMS_SERVICE_LOGS.FIND_ITEM_ERROR);
+      console.error(error);
+      return null;
+    }
+  }
+
+  static async findItems(search: ItemSearchFields): Promise<InsertItemReturn[] | null> {
+    try {
+      const resultItems = await ItemRepository.itemSearch(search);
+
+      if(resultItems === null) {
+        throw new Error();
+      }
+
+      return resultItems;
+    } catch (error) {
       return null;
     }
   }

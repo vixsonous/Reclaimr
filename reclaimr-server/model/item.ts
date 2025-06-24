@@ -1,9 +1,11 @@
 import { InsertItemReturn, ItemsCategory, NewItem } from "../db/types";
+import { ItemSearchFields } from "../repository/items-repository";
 import { ItemsService } from "../service/items-service";
 
 export class Item {
   private _item_name: string;
   private _item_category: ItemsCategory;
+  private _item_description: string;
   private _found_latitude: number;
   private _found_longitude: number;
   private _found_by_anonymous: boolean;
@@ -13,6 +15,7 @@ export class Item {
   constructor(
     item_name: string,
     item_category: ItemsCategory,
+    item_description: string,
     found_latitude: number,
     found_longitude: number,
     found_by_anonymous: boolean,
@@ -21,6 +24,7 @@ export class Item {
   ) {
     this._item_name = item_name;
     this._item_category = item_category;
+    this._item_description = item_description;
     this._found_latitude = found_latitude;
     this._found_longitude = found_longitude;
     this._found_by_anonymous = found_by_anonymous;
@@ -32,6 +36,7 @@ export class Item {
     const newItem = {
       item_name: this._item_name,
       item_category: this._item_category,
+      item_description: this._item_description,
       found_latitude: this._found_latitude,
       found_longitude: this._found_longitude,
       found_by_anonymous: this._found_by_anonymous,
@@ -42,5 +47,17 @@ export class Item {
     const itemUploadResult = await ItemsService.uploadItemToDatabase(newItem);
 
     return itemUploadResult;
+  }
+
+  static async find(id: number): Promise<InsertItemReturn | null> {
+    const itemResult = await ItemsService.findSingleItem(id);
+
+    return itemResult && itemResult.length > 0 ? itemResult[0] : null;
+  }
+
+  static async findWithSearchFields(search: ItemSearchFields): Promise<InsertItemReturn[] | null> {
+    const itemResults = await ItemsService.findItems(search);
+
+    return itemResults;
   }
 }

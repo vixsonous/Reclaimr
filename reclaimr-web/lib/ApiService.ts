@@ -15,8 +15,16 @@ export interface ApiResponse<T> {
 export interface UploadFoundItemBody {
   item_name: string;
   item_category: string;
+  item_description: string;
   item_images: FileList;
   coordinates: Partial<ICoordinates>;
+}
+
+export interface SearchFoundItemBody {
+  item_name?: string;
+  item_category?: string;
+  item_description?: string;
+  location?: Partial<ICoordinates>;
 }
 
 export class ApiService {
@@ -32,7 +40,27 @@ export class ApiService {
 }
 
 export class ItemApiService {
-  static UPLOAD_FOUND_ITEM = `/api/upload-found-item`;
+  private static _UPLOAD_FOUND_ITEM = `/api/upload-found-item`;
+  private static _SEARCH_FOUND_ITEM = `/api/search-found-item`;
+
+  static async searchFoundItem(data: SearchFoundItemBody): Promise<boolean> {
+    const SearchFoundItemResponseSche = z.object({
+      message: z.string(),
+      data: z.boolean(),
+    });
+
+    const response: ApiResponse<SearchFoundItemBody> = await ApiService.post(
+      this._SEARCH_FOUND_ITEM, 
+      data, 
+      {
+        withCredentials: true
+      }
+    );
+
+    if(!response) return false;
+    console.log(response);
+    return true;
+  }
   
   static async uploadFoundItem(data: UploadFoundItemBody): Promise<boolean> {
     const UploadFoundItemResponseSchema = z.object({
@@ -41,7 +69,7 @@ export class ItemApiService {
     });
     const response: ApiResponse<UploadFoundItemBody> = 
       await ApiService.post<UploadFoundItemBody>(
-        this.UPLOAD_FOUND_ITEM, 
+        this._UPLOAD_FOUND_ITEM, 
         data,
         {
           headers: {

@@ -5,6 +5,7 @@ import { AUTH_SERVICE_LOGS, AuthService } from "../service/auth-service";
 import { Item } from "../model/item";
 import { ItemImage } from "../model/item-image";
 import { getAccessToken } from "../utils/server-util";
+import { ItemSearchFields } from "../repository/items-repository";
 
 export const uploadFoundItem = async (req: Request, res: Response) => {
 
@@ -38,6 +39,7 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
   const itemUploadResult = await new Item(
     req.body.item_name,
     req.body.item_category,
+    req.body.item_description,
     req.body.coordinates.latitude,
     req.body.coordinates.longitude,
     false,
@@ -60,4 +62,15 @@ export const uploadFoundItem = async (req: Request, res: Response) => {
   }
   
   new ApiResponse('Successfully submitted lost item!', true).success(res);
+}
+
+export const searchFoundItem = async (req: Request, res: Response) => {
+
+  const searchFields = {
+    item_name: req.body.item_name,
+    item_category: req.body.item_category,
+    item_description: req.body.item_description,
+  } satisfies ItemSearchFields;
+  const resultItem = await Item.findWithSearchFields(searchFields);
+  new ApiResponse('Success!', resultItem).success(res);
 }

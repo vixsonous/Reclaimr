@@ -44,7 +44,9 @@ export default function FoundItemModal({
 }) {
 
   const dispatch = useDispatch();
-  const {register, handleSubmit, control, formState: {errors} } = useForm();
+  const {register, handleSubmit, control, formState: {errors} } = useForm({
+    mode: 'onChange'
+  });
   const [submitCoords, setSubmitCoords] = useState<Partial<ICoordinates>>({
     latitude: undefined,
     longitude: undefined
@@ -82,6 +84,7 @@ export default function FoundItemModal({
     const ret:boolean = await ItemApiService.uploadFoundItem({
       item_name: data.itemName,
       item_category: category,
+      item_description: data.itemDescription,
       item_images: data.itemImages,
       coordinates: {
         latitude: submitCoords.latitude,
@@ -90,15 +93,7 @@ export default function FoundItemModal({
     });
   };
 
-  // const files:Record<string, File> = useWatch({name: "itemImages"});
-  // const f = files ? Object.keys(files).map(sFile => {
-  //   const file = files[sFile];
-
-  //   return URL.createObjectURL(file);
-  // }) : [];
-
   const userAuth: UserResponse | null = useSelector((state: RootState) => state.user.userSession);
-  console.log(userAuth);
   return (
     <Modal trigger={"Found an item?"}>
       {
@@ -109,8 +104,14 @@ export default function FoundItemModal({
           </>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} action="" className="flex flex-col">
-            <Input {...register("itemName", {required: true, maxLength: 10})} placeholder="Name of the item"/>
-            {errors.itemName && <span>{errors.itemName.message?.toString()}</span>}
+            <Input errors={errors} field="itemName" {...register("itemName", {required: true, maxLength: {
+              value: 50,
+              message: "Item name should not exceed 50 characters!"
+            }})} placeholder="Name of the item"/>
+            <Input {...register("itemDescription", {required: true, maxLength: {
+              value: 99,
+              message: "Item description should not exceed 99 characters!"
+            }})} placeholder="Description of the item"/>
             <CategoryComboBox valueParams={category} setValueParams={setCategory} />
             <FileUploadInput type="file" {...register("itemImages")}/>
             <DisplayImages control={control}/>
