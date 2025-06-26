@@ -3,20 +3,26 @@ import { CategoryComboBox } from "@/app/_components/CategoryComboBox";
 import Input from "@/app/_components/Input";
 import Modal from "@/app/_components/Modal";
 import { ItemApiService } from "@/lib/ApiService";
+import { RootState } from "@/store/redux-store/store";
 import { useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 
 export default function LookItemModal() {
   const {register, handleSubmit} = useForm();
   const [category, setCategory] = useState("");
+
+  const coordinates = useSelector((state: RootState) => state.mapValues.coordinates);
   
   const onSubmit = async (data: FieldValues) => {
     const result = await ItemApiService.searchFoundItem({
       item_name: data.itemName !== "" ? data.itemName : undefined,
       item_category: category !== "" ? category : undefined,
       item_description: data.itemDescription !== "" ? data.itemDescription : undefined,
+      search_this_area: data.searchThisArea,
+      location: coordinates
     });
-
+    console.log(result);
   }
 
   return (
@@ -24,6 +30,7 @@ export default function LookItemModal() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
         <Input {...register("itemName")}/>
         <Input {...register("itemDescription")}/>
+        <Input type="checkbox" {...register("searchThisArea")}/>
         <CategoryComboBox valueParams={category} setValueParams={setCategory}/>
         <Button>
           Search

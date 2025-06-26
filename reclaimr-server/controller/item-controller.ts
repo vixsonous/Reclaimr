@@ -70,6 +70,8 @@ export const searchFoundItem = async (req: Request, res: Response) => {
     item_name: req.body.item_name,
     item_category: req.body.item_category,
     item_description: req.body.item_description,
+    search_this_area: req.body.search_this_area,
+    location: req.body.location
   } satisfies ItemSearchFields;
   const resultItem = await Item.findWithSearchFields(searchFields);
   new ApiResponse('Success!', resultItem).success(res);
