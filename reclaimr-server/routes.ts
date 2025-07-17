@@ -2,6 +2,7 @@ import { Router } from "express";
 import { searchFoundItem, uploadFoundItem } from "./controller/item-controller";
 import multer from 'multer';
 import { isUserAuthenticated, signinWithGoogle, signinWithGoogleCallback } from "./controller/auth-controller";
+import { getImageSignedUrl } from "./controller/image-controller";
 const upload = multer({dest: 'uploads/', storage: multer.memoryStorage()});
 
 const router = Router();
@@ -11,5 +12,8 @@ router.post('/search-found-item', searchFoundItem);
 router.get('/is-authenticated', isUserAuthenticated);
 router.get('/auth/google/login', signinWithGoogle);
 router.get('/auth/callback', signinWithGoogleCallback);
+
+// Image
+router.get('/signed-image', getImageSignedUrl);
 
 export default router;
